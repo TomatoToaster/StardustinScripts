@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -14,7 +14,7 @@ public class Player : MonoBehaviour
     public GameObject bulletPrefab;
 
     // The distance from the ship to the bullet spawning
-    public float bulletSpawnOffset;
+    public float bulletSpawnOffsetUp;
 
     public float chargeMax = 1;
     public float chargeGrowth = 0.2f;
@@ -23,6 +23,7 @@ public class Player : MonoBehaviour
     // The amount of charge (out of 1) that the player has
     private float charge;
 
+    // Whether the player should just keep moving towards the cursor without checking for click
     public bool autoAccelerate = false;
 
 
@@ -39,6 +40,11 @@ public class Player : MonoBehaviour
 
         // When left clicking somewhere or with auto accelerate
         if (Input.GetMouseButton(0) || autoAccelerate) {
+            // If we specifically left clicked, turn off auto accelerate
+            if (Input.GetMouseButton(0)) {
+                autoAccelerate = false;
+            }
+
             // Point the player towards the mouse
             Vector2 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector2 vectorToTarget = worldPosition - (Vector2) transform.position;
@@ -66,19 +72,15 @@ public class Player : MonoBehaviour
             chargeDown(chargeDecay * Time.deltaTime);
         }
 
-        if (getChargePercent() == 1) {
-        }
-
-        // Left click will
+        // Right click will...
         if (Input.GetMouseButtonDown(1)) {
             // Shoot bullet onlf if we're at max charge
-            // TODO REMOVE COMMENT
-            // if (getChargePercent() == 1) {
+            if (getChargePercent() == 1) {
                 Vector2 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Vector2 vectorToTarget = worldPosition - (Vector2) transform.position;
                 Quaternion directionToTarget = Quaternion.LookRotation(Vector3.forward, vectorToTarget);
-                Instantiate(bulletPrefab, transform.position + transform.up * bulletSpawnOffset, directionToTarget);
-            // }
+                Instantiate(bulletPrefab, transform.position + transform.up * bulletSpawnOffsetUp, directionToTarget);
+            }
         }
 
         // Spacebar will toggle auto accelerate

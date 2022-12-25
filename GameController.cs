@@ -10,7 +10,6 @@ public class GameController : MonoBehaviour
     public TextMeshProUGUI scoreText;
     public GameObject[] enemySpawners;
     public GameObject dustPrefab;
-    private Player playerRef;
     public int initialMinDust;
     public int initialMaxDust;
     private int minDust;
