@@ -19,12 +19,16 @@ public class Player : MonoBehaviour
     public float chargeMax = 1;
     public float chargeGrowth = 0.2f;
     public float chargeDecay = 0.2f;
+    public float bulletChargeCost = 1;
 
-    // The amount of charge (out of 1) that the player has
+    // The amount of charge (each bullet costs 1) that the player has
     private float charge;
 
     // Whether the player should just keep moving towards the cursor without checking for click
     public bool autoAccelerate = false;
+
+    // Destination object's script that we use to show where the ship is currently traveling
+    public Destination destination;
 
 
     // Start is called before the first frame update
@@ -50,6 +54,10 @@ public class Player : MonoBehaviour
             Vector2 vectorToTarget = worldPosition - (Vector2) transform.position;
             transform.rotation = Quaternion.LookRotation(Vector3.forward, vectorToTarget);
 
+            // Place the destinationObj where we're going and show it
+            destination.transform.position = worldPosition;
+            destination.show();
+
             // Add remaining movement so the player moves to the direction of the mouse
             remainingMovement = vectorToTarget.magnitude;
         }
@@ -66,20 +74,29 @@ public class Player : MonoBehaviour
             transform.position += transform.up * movement;
 
             spriteRenderer.sprite = keyframes[1];
+
+            // Charge up while we are moving
             chargeUp(chargeGrowth * Time.deltaTime);
         } else {
+            // If we've run out of movement and stopped moving, hide the destination
             spriteRenderer.sprite = keyframes[0];
+            destination.hide();
+
+            // Charge down while we aren't moving
             chargeDown(chargeDecay * Time.deltaTime);
         }
 
         // Right click will...
         if (Input.GetMouseButtonDown(1)) {
-            // Shoot bullet onlf if we're at max charge
-            if (getChargePercent() == 1) {
+            // Shoot bullet only if we have enough to shoot a bullet
+            if (getAvailableBullets() >= 1) {
                 Vector2 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Vector2 vectorToTarget = worldPosition - (Vector2) transform.position;
                 Quaternion directionToTarget = Quaternion.LookRotation(Vector3.forward, vectorToTarget);
                 Instantiate(bulletPrefab, transform.position + transform.up * bulletSpawnOffsetUp, directionToTarget);
+
+                // Remove charge for the cost of the bullet we just fired
+                chargeDown(bulletChargeCost);
             }
         }
 
@@ -113,9 +130,15 @@ public class Player : MonoBehaviour
         charge = 0f;
     }
 
-    // Get chargePercentage with range: [0-1]f
-    public float getChargePercent()
+    // Get raw charge value
+    public float getCharge()
     {
-        return charge / chargeMax;
+        return charge;
+    }
+
+    // Gets how many bullets we have available
+    public int getAvailableBullets()
+    {
+        return Mathf.FloorToInt(charge / bulletChargeCost);
     }
 }

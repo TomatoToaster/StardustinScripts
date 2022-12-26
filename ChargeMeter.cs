@@ -18,9 +18,10 @@ public class ChargeMeter : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float chargeP = player.getChargePercent();
+        float chargeRaw = player.getCharge();
+        bool isBulletAvailable = player.getAvailableBullets() > 0;
 
-        chargeText.text = chargeP.ToString("F1");
-        chargeText.color = chargeP < 1 ? new Color(1, 0, 0, 1) : new Color(0, 1, 0, 1);
+        chargeText.text = chargeRaw.ToString("F1");
+        chargeText.color = isBulletAvailable ? new Color(0, 1, 0, 1) : new Color(1, 0, 0, 1);
     }
 }
