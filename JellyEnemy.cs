@@ -8,11 +8,13 @@ public class JellyEnemy : MonoBehaviour
     public float moveSpeed = 3f;
     public float rotateSpeed = 90f;
     private GameController gameController;
+    private TutorialController tutorialController;
 
     // Start is called before the first frame update
     void Start()
     {
         gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        tutorialController = GameObject.FindGameObjectWithTag("GameController").GetComponent<TutorialController>();
     }
 
     // Update is called once per frame
@@ -29,7 +31,12 @@ public class JellyEnemy : MonoBehaviour
     {
         if (col.gameObject.tag == "Player") {
             col.gameObject.SetActive(false);
-            gameController.ReloadLevel();
+            if (gameController) {
+                gameController.ReloadLevel();
+            }
+            if (tutorialController) {
+                tutorialController.simulateGameOver();
+            }
         }
     }
 }

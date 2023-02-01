@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -16,13 +15,16 @@ public class Player : MonoBehaviour
     // The distance from the ship to the bullet spawning
     public float bulletSpawnOffsetUp;
 
-    public float chargeMax = 1;
-    public float chargeGrowth = 0.2f;
-    public float chargeDecay = 0.2f;
+    public int bulletMax;
+    public float chargeGrowth;
+    public float chargeDecay;
     public float bulletChargeCost = 1;
 
     // The amount of charge (each bullet costs 1) that the player has
     private float charge;
+
+    // The number of bullets the player has
+    private int bullets;
 
     // Whether the player should just keep moving towards the cursor without checking for click
     public bool autoAccelerate = false;
@@ -30,12 +32,16 @@ public class Player : MonoBehaviour
     // Destination object's script that we use to show where the ship is currently traveling
     public Destination destination;
 
+    // Orbit object's script that we use to add visual bullets
+    public Orbit orbit;
+
 
     // Start is called before the first frame update
     void Start()
     {
         spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
         charge = 0;
+        bullets = 0;
     }
 
     // Update is called once per frame
@@ -76,18 +82,23 @@ public class Player : MonoBehaviour
             spriteRenderer.sprite = keyframes[1];
 
             // Charge up while we are moving
-            chargeUp(chargeGrowth * Time.deltaTime);
+            updateCharge(chargeGrowth * Time.deltaTime);
         } else {
             // If we've run out of movement and stopped moving, hide the destination
             spriteRenderer.sprite = keyframes[0];
             destination.hide();
 
             // Charge down while we aren't moving
-            chargeDown(chargeDecay * Time.deltaTime);
+            updateCharge(-chargeDecay * Time.deltaTime);
         }
 
         // Right click will...
         if (Input.GetMouseButtonDown(1)) {
+            autoAccelerate = !autoAccelerate;
+        }
+
+        // Spacebar will...
+        if (Input.GetKeyDown(KeyCode.Space)) {
             // Shoot bullet only if we have enough to shoot a bullet
             if (getAvailableBullets() >= 1) {
                 Vector2 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -95,33 +106,28 @@ public class Player : MonoBehaviour
                 Quaternion directionToTarget = Quaternion.LookRotation(Vector3.forward, vectorToTarget);
                 Instantiate(bulletPrefab, transform.position + transform.up * bulletSpawnOffsetUp, directionToTarget);
 
-                // Remove charge for the cost of the bullet we just fired
-                chargeDown(bulletChargeCost);
+                // Remove bullet since we just fired
+                removeBullet();
             }
         }
-
-        // Spacebar will toggle auto accelerate
-        if (Input.GetKeyDown(KeyCode.Space)) {
-            autoAccelerate = !autoAccelerate;
-        }
     }
 
-    // Increase charge by amount
-    public void chargeUp(float amount)
+    // Increase/Decrease charge by amount
+    public void updateCharge(float amount)
     {
-        if (charge >= chargeMax) {
+        if (bullets >= bulletMax && amount >= 0) {
+            return;
+        } else if (bullets == 0 && charge <= 0 && amount < 0) {
             return;
         }
-        charge = Mathf.Min(charge + amount, chargeMax);
-    }
-
-    // Decrease charge by amount
-    public void chargeDown(float amount)
-    {
-        if (charge <= 0f) {
-            return;
+        charge += amount;
+        if (charge < 0) {
+            charge = 0;
+            removeBullet();
+        } else if (charge >= bulletChargeCost) {
+            charge = 0;
+            addBullet();
         }
-        charge = Mathf.Max(charge - amount, 0f);
     }
 
     // Reset charge amount
@@ -136,9 +142,31 @@ public class Player : MonoBehaviour
         return charge;
     }
 
+    private void addBullet()
+    {
+        bullets += 1;
+        orbit.addBullet();
+    }
+
+    private void removeBullet()
+    {
+        bullets -= 1;
+        orbit.removeBullet();
+    }
+
     // Gets how many bullets we have available
     public int getAvailableBullets()
     {
-        return Mathf.FloorToInt(charge / bulletChargeCost);
+        return bullets;
+    }
+
+    public void resetMovement()
+    {
+        remainingMovement = 0f;
+    }
+
+    public void incrementSpeed(float amount)
+    {
+        moveSpeed += amount;
     }
 }

@@ -8,6 +8,7 @@ public class Dust : MonoBehaviour
     private Rigidbody2D myRigidbody;
     public float moveSpeed;
     public float secondsOfLife;
+    public float speedReward = 0.25f;
     private Vector2 lastVelocity;
     // Start is called before the first frame update
     void Start()
@@ -26,9 +27,12 @@ public class Dust : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // If we hit a player, simply add score and destroy this item
+        // If we hit a player, add score, increase player speed, and destroy this item
         if (collision.gameObject.tag == "Player") {
-            gameController.AddScore(500);
+            if (gameController) {
+                gameController.AddScore(500);
+            }
+            collision.gameObject.GetComponent<Player>().incrementSpeed(speedReward);
             Destroy(gameObject);
             return;
         }

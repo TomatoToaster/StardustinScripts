@@ -25,11 +25,13 @@ public class Bullet : MonoBehaviour
     {
         // Kill the enemy and spawn dust off their body
         if (col.tag == "Enemy") {
-            gameController.AddScore(100);
-            gameController.SpawnDust(col.gameObject.transform.position);
+            if (gameController != null) {
+                gameController.AddScore(100);
+                gameController.SpawnDust(col.gameObject.transform.position);
+                gameController.SpawnEnemy();
+            }
             Destroy(col.gameObject);
             Destroy(gameObject);
-            gameController.SpawnEnemy();
         }
     }
 
