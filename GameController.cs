@@ -12,6 +12,9 @@ public class GameController : MonoBehaviour
     public GameObject dustPrefab;
     public int initialMinDust;
     public int initialMaxDust;
+    public GameObject gameOverObj;
+    public TextMeshProUGUI gameOverScore;
+    public float gameOverTime;
     private int minDust;
     private int maxDust;
     public float scoreToSpeedFactor;
@@ -36,7 +39,7 @@ public class GameController : MonoBehaviour
 
         // TODO eventually build pause screen but Escape key will return us to Main Menu for now
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            SceneManager.LoadScene(0);
+            SceneManager.LoadScene("MainMenu");
         }
     }
 
@@ -45,6 +48,7 @@ public class GameController : MonoBehaviour
     {
         score += amount;
         scoreText.text = "Score: " + score;
+        gameOverScore.text = "Final Score: " + score;
     }
 
     // Spawn an enemy in one of the enemySpawners
@@ -120,15 +124,14 @@ public class GameController : MonoBehaviour
     }
 
     // Reloads the Scene after waiting a bit, using WaitToRestart()
-    public void ReloadLevel()
+    public void GameOver()
     {
-        StartCoroutine(WaitToRestart());
+        gameOverObj.SetActive(true);
     }
 
-    private IEnumerator WaitToRestart()
+    public void GoToMainMenu()
     {
-        yield return new WaitForSeconds(2);
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene("MainMenu");
     }
 
 }

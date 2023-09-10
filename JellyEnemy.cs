@@ -32,7 +32,7 @@ public class JellyEnemy : MonoBehaviour
         if (col.gameObject.tag == "Player") {
             col.gameObject.SetActive(false);
             if (gameController) {
-                gameController.ReloadLevel();
+                gameController.GameOver();
             }
             if (tutorialController) {
                 tutorialController.simulateGameOver();

@@ -47,7 +47,7 @@ public class TutorialController : MonoBehaviour
 
         // TODO eventually build pause screen but Escape key will return us to Main Menu for now
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            SceneManager.LoadScene(0);
+            SceneManager.LoadScene("MainMenu");
         }
     }
 
@@ -88,7 +88,7 @@ public class TutorialController : MonoBehaviour
     void setUpStep(int stepIndex)
     {
         if (stepIndex == endTutorialStep) {
-            SceneManager.LoadScene(1);
+            SceneManager.LoadScene("Play");
             return;
         }
         currentObjective = objectives[stepIndex];
